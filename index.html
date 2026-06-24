@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SkyRiseBet - Aviator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b0e14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 16px;
+        }
+        .card {
+            max-width: 400px;
+            width: 100%;
+            background: #141a24;
+            border-radius: 24px;
+            padding: 24px 20px;
+            border: 1px solid #2a2f3a;
+            color: #fff;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        .header .balance {
+            background: #1e2632;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #8a9bb0;
+        }
+        .header .balance span {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .game-area {
+            background: #0b0e14;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            border: 1px solid #2a2f3a;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .game-area .multiplier {
+            font-size: 64px;
+            font-weight: 800;
+            color: #fbbf24;
+            letter-spacing: -2px;
+        }
+        .game-area .status {
+            font-size: 14px;
+            color: #8a9bb0;
+            margin-top: 8px;
+        }
+        .game-area .status .live {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        .bet-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .bet-controls input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #2a2f3a;
+            background: #0b0e14;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+        .bet-controls input:focus {
+            border-color: #fbbf24;
+        }
+        .bet-controls button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            background: #fbbf24;
+            color: #0b0e14;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .bet-controls button:active {
+            transform: scale(0.96);
+        }
+        .btn-deposit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: #1a73e8;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-bottom: 12px;
+        }
+        .btn-deposit:active {
+            transform: scale(0.96);
+        }
+        .btn-bot {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #2a2f3a;
+            background: transparent;
+            color: #8a9bb0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s;
+            margin-bottom: 6px;
+        }
+        .btn-bot:hover {
+            background: #1a202a;
+        }
+        .btn-bot:active {
+            transform: scale(0.96);
+        }
+        .leaderboard {
+            background: #0b0e14;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #2a2f3a;
+            margin-top: 12px;
+        }
+        .leaderboard h3 {
+            font-size: 14px;
+            color: #8a9bb0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .leaderboard .entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #1a202a;
+        }
+        .leaderboard .entry:last-child {
+            border-bottom: none;
+        }
+        .leaderboard .entry .amount {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #4a5568;
+            text-align: center;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2632;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            border: 1px solid #2a2f3a;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        @keyframes crash {
+            0% { color: #fbbf24; }
+            100% { color: #ef4444; transform: scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header">
+            <h1>✈️ SkyRiseBet</h1>
+            <div class="balance">💰 <span id="balanceDisplay">0.00</span></div>
+        </div>
+
+        <div class="game-area">
+            <div class="multiplier" id="multiplierDisplay">1.00x</div>
+            <div class="status"><span class="live">●</span> Waiting for next round...</div>
+        </div>
+
+        <div class="bet-controls">
+            <input type="number" id="betAmount" placeholder="0.00" value="1.00" step="0.50" />
+            <button id="betBtn">Place Bet</button>
+        </div>
+
+        <button class="btn-deposit" id="depositBtn">💰 Deposit</button>
+
+        <button class="btn-bot" id="botBalanceBtn">📊 Balance</button>
+        <button class="btn-bot" id="botHistoryBtn">📜 History</button>
+        <button class="btn-bot" id="botWithdrawBtn">💸 Withdraw</button>
+        <button class="btn-bot" id="botHelpBtn">❓ Help</button>
+
+        <div class="leaderboard">
+            <h3>🏆 Top Winners</h3>
+            <div class="entry"><span>Player_41</span><span class="amount">+$420.00</span></div>
+            <div class="entry"><span>SkyKing_99</span><span class="amount">+$310.50</span></div>
+            <div class="entry"><span>LuckyBets</span><span class="amount">+$250.00</span></div>
+            <div class="entry"><span>Wolfpack_7</span><span class="amount">+$180.00</span></div>
+            <div class="entry"><span>DiamondHands</span><span class="amount">+$120.00</span></div>
+        </div>
+
+        <div class="footer">
+            <span>Powered by SkyRiseBet</span>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // SKYRISEBET – PRODUCTION-READY
+        // Telegram bot as backend. No server. No database.
+        // ============================================================
+
+        // ---- TELEGRAM BOT CONFIG ----
+        const BOT_USERNAME = 'aviatorcryptopay_bot';
+        const BOT_LINK = `https://t.me/${BOT_USERNAME}`;
+        const BTC_WALLET = 'bc1qg4pc08qyz0ghvkasqx9d59vv9hn8v8twkzndpw';
+        const USDT_WALLET = '0xF9Aa56c697AEd09cEb2326edAcD2Cab71a935Ce4';
+
+        // ---- FAKE BALANCE (localStorage) ----
+        let balance = parseFloat(localStorage.getItem('skyBalance')) || 0;
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        balanceDisplay.textContent = balance.toFixed(2);
+
+        // ---- TOAST NOTIFICATION ----
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ---- OPEN TELEGRAM WITH COMMAND ----
+        function openBot(command) {
+            window.open(`${BOT_LINK}?start=${command}`, '_blank');
+        }
+
+        // ---- FAKE GAME ENGINE ----
+        let isPlaying = false;
+        let currentMultiplier = 1.00;
+        const multiplierDisplay = document.getElementById('multiplierDisplay');
+        const statusDisplay = document.querySelector('.status');
+        const betAmount = document.getElementById('betAmount');
+        const betBtn = document.getElementById('betBtn');
+
+        function startRound() {
+            if (isPlaying) return;
+            isPlaying = true;
+            currentMultiplier = 1.00;
+            multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+            multiplierDisplay.style.color = '#fbbf24';
+            statusDisplay.innerHTML = '<span class="live">●</span> Round in progress...';
+
+            const interval = setInterval(() => {
+                const increment = (Math.random() * 0.15 + 0.05);
+                currentMultiplier += increment;
+
+                if (currentMultiplier > 3.5 + Math.random() * 3) {
+                    clearInterval(interval);
+                    multiplierDisplay.style.color = '#ef4444';
+                    multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+                    statusDisplay.innerHTML = '<span class="live">●</span> Game crashed! Next round soon...';
+                    isPlaying = false;
+                    setTimeout(startRound, 3000);
+                } else {
+                    multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+                }
+            }, 200);
+        }
+
+        // ---- BET LOGIC ----
+        betBtn.addEventListener('click', function() {
+            if (isPlaying) {
+                // Cash out
+                const bet = parseFloat(betAmount.value) || 0;
+                if (bet <= 0) return;
+                if (bet > balance) {
+                    showToast('❌ Insufficient balance!');
+                    return;
+                }
+                const win = bet * currentMultiplier;
+                balance += win - bet;
+                balanceDisplay.textContent = balance.toFixed(2);
+                localStorage.setItem('skyBalance', balance);
+                multiplierDisplay.style.color = '#22c55e';
+                setTimeout(() => { multiplierDisplay.style.color = '#fbbf24'; }, 1000);
+                statusDisplay.innerHTML = `<span class="live">●</span> Cashed out at ${currentMultiplier.toFixed(2)}x!`;
+                isPlaying = false;
+                showToast(`✅ Won $${(win - bet).toFixed(2)}!`);
+            } else {
+                // Place bet
+                const bet = parseFloat(betAmount.value) || 0;
+                if (bet <= 0) return;
+                if (bet > balance) {
+                    showToast('❌ Insufficient balance!');
+                    return;
+                }
+                balance -= bet;
+                balanceDisplay.textContent = balance.toFixed(2);
+                localStorage.setItem('skyBalance', balance);
+                startRound();
+                showToast(`🚀 Bet placed: $${bet.toFixed(2)}`);
+            }
+        });
+
+        // ---- DEPOSIT BUTTON ----
+        document.getElementById('depositBtn').addEventListener('click', function() {
+            const msg =
+                `✅ Deposit Instructions\n\nSend USDT (ERC20) or BTC to:\n\nBTC: ${BTC_WALLET}\nUSDT (ERC20): ${USDT_WALLET}\n\nAfter sending, forward the transaction hash to @${BOT_USERNAME} and we'll credit your balance.`;
+            window.open(`https://t.me/${BOT_USERNAME}?start=deposit`, '_blank');
+        });
+
+        // ---- BOT COMMAND BUTTONS ----
+        document.getElementById('botBalanceBtn').addEventListener('click', function() {
+            openBot('balance');
+        });
+
+        document.getElementById('botHistoryBtn').addEventListener('click', function() {
+            openBot('history');
+        });
+
+        document.getElementById('botWithdrawBtn').addEventListener('click', function() {
+            openBot('withdraw');
+        });
+
+        document.getElementById('botHelpBtn').addEventListener('click', function() {
+            openBot('help');
+        });
+
+        // ---- START GAME ----
+        setTimeout(startRound, 1500);
+
+        // ---- KEYBOARD SHORTCUT ----
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') betBtn.click();
+        });
+    </script>
+</body>
+</html>

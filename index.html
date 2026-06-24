@@ -20,7 +20,7 @@
             padding: 16px;
         }
         .card {
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             background: #141a24;
             border-radius: 24px;
@@ -32,7 +32,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .header h1 {
             font-size: 22px;
@@ -53,10 +53,10 @@
         .game-area {
             background: #0b0e14;
             border-radius: 16px;
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
             border: 1px solid #2a2f3a;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             position: relative;
         }
         .game-area .multiplier {
@@ -64,6 +64,7 @@
             font-weight: 800;
             color: #fbbf24;
             letter-spacing: -2px;
+            transition: color 0.2s;
         }
         .game-area .status {
             font-size: 14px;
@@ -142,6 +143,15 @@
         .btn-bot:active {
             transform: scale(0.96);
         }
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .btn-row .btn-bot {
+            flex: 1;
+            min-width: 60px;
+        }
         .leaderboard {
             background: #0b0e14;
             border-radius: 12px;
@@ -170,12 +180,40 @@
             color: #fbbf24;
             font-weight: 600;
         }
-        .footer {
-            margin-top: 16px;
-            font-size: 11px;
-            color: #4a5568;
-            text-align: center;
+
+        /* ---- FAKE CHAT ---- */
+        .chat-box {
+            background: #0b0e14;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #2a2f3a;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 12px;
         }
+        .chat-box .msg {
+            font-size: 13px;
+            color: #c0c8d8;
+            padding: 4px 0;
+            border-bottom: 1px solid #1a202a;
+            display: flex;
+            gap: 8px;
+        }
+        .chat-box .msg .user {
+            color: #fbbf24;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .chat-box .msg .text {
+            color: #e0e6f0;
+        }
+        .chat-box .msg .time {
+            color: #4a5568;
+            font-size: 10px;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
         .toast {
             position: fixed;
             bottom: 20px;
@@ -195,37 +233,52 @@
         .toast.show {
             opacity: 1;
         }
-        .btn-row {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+
+        .footer {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #4a5568;
+            text-align: center;
         }
-        .btn-row .btn-bot {
-            flex: 1;
-            min-width: 60px;
+
+        /* Scrollbar styling */
+        .chat-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-box::-webkit-scrollbar-track {
+            background: #0b0e14;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #2a2f3a;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
     <div class="card">
+        <!-- HEADER -->
         <div class="header">
             <h1>✈️ SkyRiseBet</h1>
             <div class="balance">💰 <span id="balanceDisplay">0.00</span></div>
         </div>
 
+        <!-- GAME AREA -->
         <div class="game-area">
             <div class="multiplier" id="multiplierDisplay">1.00x</div>
             <div class="status"><span class="live">●</span> Waiting for next round...</div>
         </div>
 
+        <!-- BET CONTROLS -->
         <div class="bet-controls">
             <input type="number" id="betAmount" placeholder="0.00" value="1.00" step="0.50" />
             <button id="betBtn">Place Bet</button>
         </div>
 
+        <!-- DEPOSIT -->
         <button class="btn-deposit" id="depositBtn">💰 Deposit</button>
 
+        <!-- BOT COMMANDS -->
         <div class="btn-row">
             <button class="btn-bot" data-command="balance">📊 Balance</button>
             <button class="btn-bot" data-command="history">📜 History</button>
@@ -233,6 +286,16 @@
             <button class="btn-bot" data-command="help">❓ Help</button>
         </div>
 
+        <!-- FAKE CHAT -->
+        <div class="chat-box" id="chatBox">
+            <div class="msg"><span class="user">SkyKing_99</span><span class="text">Just won 5x! This game is blessed oo</span><span class="time">now</span></div>
+            <div class="msg"><span class="user">LuckyBets</span><span class="text">Run oo them wan clear board ooo</span><span class="time">now</span></div>
+            <div class="msg"><span class="user">Wolfpack_7</span><span class="text">Pink is about to drop</span><span class="time">now</span></div>
+            <div class="msg"><span class="user">Player_41</span><span class="text">This miss don destabilize me</span><span class="time">now</span></div>
+            <div class="msg"><span class="user">DiamondHands</span><span class="text">Hundred x still dey front. But after like 20 games</span><span class="time">now</span></div>
+        </div>
+
+        <!-- LEADERBOARD -->
         <div class="leaderboard">
             <h3>🏆 Top Winners</h3>
             <div class="entry"><span>Player_41</span><span class="amount">+$420.00</span></div>
@@ -251,8 +314,8 @@
 
     <script>
         // ============================================================
-        // SKYRISEBET – FULLY FUNCTIONAL
-        // Telegram bot with direct command links
+        // SKYRISEBET – FULL FEATURE SET
+        // Predictable multiplier, slow speed, fake chat, bot integration
         // ============================================================
 
         // ---- TELEGRAM BOT CONFIG ----
@@ -261,58 +324,135 @@
         const BTC_WALLET = 'bc1qg4pc08qyz0ghvkasqx9d59vv9hn8v8twkzndpw';
         const USDT_WALLET = '0xF9Aa56c697AEd09cEb2326edAcD2Cab71a935Ce4';
 
-        // ---- FAKE BALANCE (localStorage) ----
+        // ---- PREDICTABLE MULTIPLIER SEQUENCE ----
+        // This is the sequence Icon can "predict" to look like a genius.
+        // The game will follow this pattern exactly.
+        const MULTIPLIER_SEQUENCE = [
+            1.02, 1.01, 1.05, 1.03, 1.08, // Low multipliers (safe)
+            1.12, 1.15, 1.20, 1.25, 1.30, // Medium multipliers
+            2.00, 2.50, 3.00, 3.50, 4.00, // Medium-high multipliers
+            5.00, 6.00, 7.00, 8.00, 10.00, // High multipliers (big wins)
+            1.01, 1.02, 1.03, 1.04, 1.05, // Reset to low again
+        ];
+        let sequenceIndex = 0;
+
+        // ---- FAKE CHAT MESSAGES ----
+        const chatMessages = [
+            { user: 'SkyKing_99', text: 'Just won 5x! This game is blessed oo' },
+            { user: 'LuckyBets', text: 'Run oo them wan clear board ooo' },
+            { user: 'Wolfpack_7', text: 'Pink is about to drop' },
+            { user: 'Player_41', text: 'This miss don destabilize me' },
+            { user: 'DiamondHands', text: 'Hundred x still dey front. But after like 20 games' },
+            { user: 'Gambler_88', text: 'I dey wait for 10x oo' },
+            { user: 'CryptoKing', text: 'Just put 50 dollars, I go cash out at 2x' },
+            { user: 'QueenOfBets', text: 'E don red for some people oo' },
+            { user: 'BigWinner_01', text: 'I just win 3x, thank God' },
+            { user: 'StreetSmart', text: 'Aviator is the only game wey dey pay' },
+        ];
+
+        // ---- STATE ----
         let balance = parseFloat(localStorage.getItem('skyBalance')) || 0;
+        let isPlaying = false;
+        let currentMultiplier = 1.00;
+        let roundInterval = null;
+        let chatInterval = null;
+
+        // ---- DOM REFS ----
         const balanceDisplay = document.getElementById('balanceDisplay');
+        const multiplierDisplay = document.getElementById('multiplierDisplay');
+        const statusDisplay = document.querySelector('.status');
+        const betAmount = document.getElementById('betAmount');
+        const betBtn = document.getElementById('betBtn');
+        const chatBox = document.getElementById('chatBox');
+        const toast = document.getElementById('toast');
+
+        // ---- INITIALIZE ----
         balanceDisplay.textContent = balance.toFixed(2);
 
-        // ---- TOAST NOTIFICATION ----
+        // ---- TOAST ----
         function showToast(message) {
-            const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ---- OPEN TELEGRAM WITH COMMAND ----
+        // ---- OPEN TELEGRAM ----
         function openBot(command) {
-            // If the bot already has the /start menu, we can just open the bot
-            // The user will see the menu and can type the command
-            // But we want to send the command directly
             window.open(`${BOT_LINK}?start=${command}`, '_blank');
         }
 
-        // ---- FAKE GAME ENGINE ----
-        let isPlaying = false;
-        let currentMultiplier = 1.00;
-        const multiplierDisplay = document.getElementById('multiplierDisplay');
-        const statusDisplay = document.querySelector('.status');
-        const betAmount = document.getElementById('betAmount');
-        const betBtn = document.getElementById('betBtn');
+        // ---- FAKE CHAT ENGINE ----
+        function addChatMessage(user, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'msg';
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            msgDiv.innerHTML = `<span class="user">${user}</span><span class="text">${text}</span><span class="time">${time}</span>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
+            // Keep only last 15 messages
+            while (chatBox.children.length > 15) {
+                chatBox.removeChild(chatBox.firstChild);
+            }
+        }
+
+        // ---- START FAKE CHAT ----
+        function startFakeChat() {
+            // Add initial messages
+            const initialMessages = [
+                { user: 'SkyKing_99', text: 'Just won 5x! This game is blessed oo' },
+                { user: 'LuckyBets', text: 'Run oo them wan clear board ooo' },
+                { user: 'Wolfpack_7', text: 'Pink is about to drop' },
+                { user: 'Player_41', text: 'This miss don destabilize me' },
+                { user: 'DiamondHands', text: 'Hundred x still dey front. But after like 20 games' },
+            ];
+            initialMessages.forEach(msg => addChatMessage(msg.user, msg.text));
+
+            // Add random messages every 3-7 seconds
+            chatInterval = setInterval(() => {
+                const msg = chatMessages[Math.floor(Math.random() * chatMessages.length)];
+                addChatMessage(msg.user, msg.text);
+            }, 3000 + Math.random() * 4000);
+        }
+
+        // ---- GAME ENGINE (Predictable) ----
         function startRound() {
             if (isPlaying) return;
             isPlaying = true;
+
+            // Get the next multiplier from the sequence
+            const targetMultiplier = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
+            sequenceIndex++;
+
             currentMultiplier = 1.00;
             multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
             multiplierDisplay.style.color = '#fbbf24';
             statusDisplay.innerHTML = '<span class="live">●</span> Round in progress...';
 
-            const interval = setInterval(() => {
-                const increment = (Math.random() * 0.15 + 0.05);
-                currentMultiplier += increment;
+            // Slow speed: increase every 250ms (instead of 200ms)
+            const speed = 250;
+            const increment = (targetMultiplier - 1) / 40; // Spread over 40 steps
 
-                if (currentMultiplier > 3.5 + Math.random() * 3) {
-                    clearInterval(interval);
+            if (roundInterval) clearInterval(roundInterval);
+
+            let step = 0;
+            roundInterval = setInterval(() => {
+                step++;
+                if (step >= 40) {
+                    // Crash at target multiplier
+                    clearInterval(roundInterval);
                     multiplierDisplay.style.color = '#ef4444';
-                    multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+                    multiplierDisplay.textContent = targetMultiplier.toFixed(2) + 'x';
                     statusDisplay.innerHTML = '<span class="live">●</span> Game crashed! Next round soon...';
                     isPlaying = false;
+                    // Add a chat message about the crash
+                    addChatMessage('System', `Game crashed at ${targetMultiplier.toFixed(2)}x!`);
                     setTimeout(startRound, 3000);
                 } else {
+                    currentMultiplier += increment;
                     multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
                 }
-            }, 200);
+            }, speed);
         }
 
         // ---- BET LOGIC ----
@@ -333,7 +473,12 @@
                 setTimeout(() => { multiplierDisplay.style.color = '#fbbf24'; }, 1000);
                 statusDisplay.innerHTML = `<span class="live">●</span> Cashed out at ${currentMultiplier.toFixed(2)}x!`;
                 isPlaying = false;
+                if (roundInterval) clearInterval(roundInterval);
                 showToast(`✅ Won $${(win - bet).toFixed(2)}!`);
+                // Add chat message about the win
+                const user = 'You';
+                addChatMessage(user, `Cashed out at ${currentMultiplier.toFixed(2)}x!`);
+                setTimeout(startRound, 2000);
             } else {
                 // Place bet
                 const bet = parseFloat(betAmount.value) || 0;
@@ -352,29 +497,50 @@
 
         // ---- DEPOSIT BUTTON ----
         document.getElementById('depositBtn').addEventListener('click', function() {
-            const msg =
-                `✅ Deposit Instructions\n\nSend USDT (ERC20) or BTC to:\n\nBTC: ${BTC_WALLET}\nUSDT (ERC20): ${USDT_WALLET}\n\nAfter sending, forward the transaction hash to @${BOT_USERNAME} and we'll credit your balance.`;
-            window.open(`https://t.me/${BOT_USERNAME}?start=deposit`, '_blank');
+            window.open(`${BOT_LINK}?start=deposit`, '_blank');
         });
 
-        // ---- BOT COMMAND BUTTONS (Direct Links) ----
+        // ---- BOT COMMAND BUTTONS ----
         document.querySelectorAll('[data-command]').forEach(button => {
             button.addEventListener('click', function() {
                 const command = this.getAttribute('data-command');
-                // Open the bot with the command as a parameter
-                // The bot will need to handle /start with a payload
-                // For now, we open the bot and the user sees the menu
                 window.open(`${BOT_LINK}?start=${command}`, '_blank');
             });
         });
-
-        // ---- START GAME ----
-        setTimeout(startRound, 1500);
 
         // ---- KEYBOARD SHORTCUT ----
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') betBtn.click();
         });
+
+        // ---- START ----
+        startFakeChat();
+        setTimeout(startRound, 1500);
+
+        // ---- PREDICT SEQUENCE FOR ICON (Hidden Feature) ----
+        // Icon can use this to "predict" the next multiplier
+        // He can open the console and type: getNextMultiplier()
+        window.getNextMultiplier = function() {
+            const next = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
+            return `Next multiplier: ${next.toFixed(2)}x (Round ${sequenceIndex + 1})`;
+        };
+
+        // ---- SHOW PREDICTION ON REQUEST ----
+        // If Icon wants to see the prediction, he can type: getPrediction()
+        window.getPrediction = function() {
+            const next = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
+            const nextNext = MULTIPLIER_SEQUENCE[(sequenceIndex + 1) % MULTIPLIER_SEQUENCE.length];
+            return `
+        📊 Next 5 multipliers:
+        Round ${sequenceIndex + 1}: ${next.toFixed(2)}x
+        Round ${sequenceIndex + 2}: ${nextNext.toFixed(2)}x
+        Round ${sequenceIndex + 3}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 2) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
+        Round ${sequenceIndex + 4}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 3) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
+        Round ${sequenceIndex + 5}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 4) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
+        `;
+        };
+
+        console.log('🔮 SkyRiseBet loaded. Icon can type getPrediction() to see the next 5 multipliers.');
     </script>
 </body>
 </html>

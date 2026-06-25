@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SkyRiseBet - Aviator</title>
+    <!-- QRCode.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -103,14 +105,18 @@
             color: #fbbf24;
             font-weight: 600;
         }
+
+        /* ---- GAME AREA WITH PLANE ---- */
         .game-area {
             background: #0b0e14;
             border-radius: 16px;
-            padding: 30px 20px;
+            padding: 20px 20px 30px;
             text-align: center;
             border: 1px solid #2a2f3a;
             margin-bottom: 16px;
             position: relative;
+            overflow: hidden;
+            min-height: 200px;
         }
         .game-area .multiplier {
             font-size: 64px;
@@ -118,16 +124,48 @@
             color: #fbbf24;
             letter-spacing: -2px;
             transition: color 0.2s;
+            position: relative;
+            z-index: 5;
         }
         .game-area .status {
             font-size: 14px;
             color: #8a9bb0;
             margin-top: 8px;
+            position: relative;
+            z-index: 5;
         }
         .game-area .status .live {
             color: #22c55e;
             font-weight: 600;
         }
+
+        /* ---- PLANE ANIMATION ---- */
+        .plane-container {
+            position: absolute;
+            top: 10%;
+            left: -80px;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .plane {
+            font-size: 42px;
+            position: absolute;
+            top: 20%;
+            left: 0;
+            transition: none;
+            transform: rotate(10deg);
+        }
+        .plane.flying {
+            animation: flyPlane 3s ease-in forwards;
+        }
+        @keyframes flyPlane {
+            0% { left: -80px; top: 20%; transform: rotate(10deg) scale(0.8); }
+            50% { left: 60%; top: 10%; transform: rotate(5deg) scale(1.2); }
+            100% { left: 110%; top: 0%; transform: rotate(0deg) scale(1); }
+        }
+
         .bet-controls {
             display: flex;
             gap: 12px;
@@ -221,6 +259,8 @@
             flex: 1;
             min-width: 60px;
         }
+
+        /* ---- LEADERBOARD ---- */
         .leaderboard {
             background: #0b0e14;
             border-radius: 12px;
@@ -250,12 +290,41 @@
             font-weight: 600;
         }
 
+        /* ---- HISTORY ---- */
+        .history-box {
+            background: #0b0e14;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #2a2f3a;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        .history-box .entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #1a202a;
+            color: #c0c8d8;
+        }
+        .history-box .entry .type-deposit {
+            color: #22c55e;
+        }
+        .history-box .entry .type-withdraw {
+            color: #ef4444;
+        }
+        .history-box .entry .type-bet {
+            color: #fbbf24;
+        }
+
+        /* ---- CHAT ---- */
         .chat-box {
             background: #0b0e14;
             border-radius: 12px;
             padding: 12px;
             border: 1px solid #2a2f3a;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
             margin-top: 12px;
         }
@@ -281,7 +350,36 @@
             margin-left: auto;
             white-space: nowrap;
         }
+        .chat-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid #2a2f3a;
+            background: #0b0e14;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-input input:focus {
+            border-color: #fbbf24;
+        }
+        .chat-input button {
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: none;
+            background: #fbbf24;
+            color: #0b0e14;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
 
+        /* ---- MODAL ---- */
         .modal {
             display: none;
             position: fixed;
@@ -293,6 +391,7 @@
             align-items: center;
             justify-content: center;
             z-index: 200;
+            padding: 16px;
         }
         .modal.show {
             display: flex;
@@ -305,13 +404,15 @@
             width: 100%;
             border: 1px solid #2a2f3a;
             color: #fff;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-content h2 {
             color: #fbbf24;
             text-align: center;
             margin-bottom: 16px;
         }
-        .modal-content .address {
+        .modal-content .address-box {
             background: #0b0e14;
             padding: 12px;
             border-radius: 12px;
@@ -319,12 +420,41 @@
             word-break: break-all;
             font-size: 14px;
             margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
         }
-        .modal-content .address span {
+        .modal-content .address-box span {
             color: #8a9bb0;
             display: block;
             font-size: 12px;
             margin-bottom: 4px;
+        }
+        .modal-content .address-box .address-text {
+            flex: 1;
+            font-size: 13px;
+        }
+        .modal-content .address-box .copy-btn {
+            background: #2a2f3a;
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .modal-content .address-box .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .modal-content .qr-container {
+            text-align: center;
+            margin: 12px 0;
+        }
+        .modal-content .qr-container canvas {
+            background: #fff;
+            padding: 8px;
+            border-radius: 12px;
         }
         .modal-content .btn-close {
             width: 100%;
@@ -336,11 +466,11 @@
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 8px;
         }
         .modal-content .btn-close:active {
             transform: scale(0.96);
         }
-
         .toast {
             position: fixed;
             bottom: 20px;
@@ -360,30 +490,24 @@
         .toast.show {
             opacity: 1;
         }
-
         .footer {
             margin-top: 16px;
             font-size: 11px;
             color: #4a5568;
             text-align: center;
         }
-
-        .chat-box::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-box::-webkit-scrollbar-track {
-            background: #0b0e14;
-        }
-        .chat-box::-webkit-scrollbar-thumb {
-            background: #2a2f3a;
-            border-radius: 4px;
-        }
+        .history-box::-webkit-scrollbar,
+        .chat-box::-webkit-scrollbar,
         .currency-list::-webkit-scrollbar {
             width: 4px;
         }
+        .history-box::-webkit-scrollbar-track,
+        .chat-box::-webkit-scrollbar-track,
         .currency-list::-webkit-scrollbar-track {
-            background: #1a202a;
+            background: #0b0e14;
         }
+        .history-box::-webkit-scrollbar-thumb,
+        .chat-box::-webkit-scrollbar-thumb,
         .currency-list::-webkit-scrollbar-thumb {
             background: #2a2f3a;
             border-radius: 4px;
@@ -400,15 +524,14 @@
         </div>
 
         <!-- CURRENCY SELECTOR -->
-        <div class="currency-selector" id="currencySelector">
+        <div class="currency-selector">
             <input type="text" id="currencySearch" placeholder="Search currency..." onfocus="showCurrencyList()" oninput="filterCurrency()" />
-            <div class="currency-list" id="currencyList">
-                <!-- Populated by JavaScript -->
-            </div>
+            <div class="currency-list" id="currencyList"></div>
         </div>
 
-        <!-- GAME AREA -->
-        <div class="game-area">
+        <!-- GAME AREA WITH PLANE -->
+        <div class="game-area" id="gameArea">
+            <div class="plane-container"><div class="plane" id="plane">✈️</div></div>
             <div class="multiplier" id="multiplierDisplay">1.00x</div>
             <div class="status"><span class="live">●</span> Waiting for next round...</div>
         </div>
@@ -423,20 +546,18 @@
         <button class="btn-deposit" id="depositBtn">💰 Deposit</button>
         <button class="btn-withdraw" id="withdrawBtn">💸 Withdraw</button>
 
-        <!-- BOT COMMANDS -->
-        <div class="btn-row">
-            <button class="btn-bot" data-command="balance">📊 Balance</button>
-            <button class="btn-bot" data-command="history">📜 History</button>
-            <button class="btn-bot" data-command="help">❓ Help</button>
+        <!-- HISTORY -->
+        <div class="history-box" id="historyBox">
+            <div class="entry" style="color:#4a5568;">No transactions yet.</div>
         </div>
 
         <!-- FAKE CHAT -->
         <div class="chat-box" id="chatBox">
             <div class="msg"><span class="user">SkyKing_99</span><span class="text">Just won 5x! This game is blessed oo</span><span class="time">now</span></div>
-            <div class="msg"><span class="user">LuckyBets</span><span class="text">Run oo them wan clear board ooo</span><span class="time">now</span></div>
-            <div class="msg"><span class="user">Wolfpack_7</span><span class="text">Pink is about to drop</span><span class="time">now</span></div>
-            <div class="msg"><span class="user">Player_41</span><span class="text">This miss don destabilize me</span><span class="time">now</span></div>
-            <div class="msg"><span class="user">DiamondHands</span><span class="text">Hundred x still dey front. But after like 20 games</span><span class="time">now</span></div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type a message..." />
+            <button id="chatSendBtn">Send</button>
         </div>
 
         <!-- LEADERBOARD -->
@@ -449,25 +570,28 @@
             <div class="entry"><span>DiamondHands</span><span class="amount">+₦120,000</span></div>
         </div>
 
-        <div class="footer">
-            <span>Powered by SkyRiseBet</span>
-        </div>
+        <div class="footer">Powered by SkyRiseBet</div>
     </div>
 
     <!-- DEPOSIT MODAL -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
-            <h2>💰 Deposit Instructions</h2>
-            <p style="color:#8a9bb0;font-size:14px;margin-bottom:12px;">Send USDT (TRC20) or BTC to the addresses below:</p>
-            <div class="address">
-                <span>BTC</span>
-                bc1qg4pc08qyz0ghvkasqx9d59vv9hn8v8twkzndpw
+            <h2>💰 Deposit</h2>
+            <p style="color:#8a9bb0;font-size:14px;margin-bottom:12px;">Send USDT (ERC20) or BTC to the addresses below:</p>
+
+            <div class="address-box">
+                <div><span>BTC</span><div class="address-text" id="btcAddress">bc1qg4pc08qyz0ghvkasqx9d59vv9hn8v8twkzndpw</div></div>
+                <button class="copy-btn" onclick="copyAddress('btcAddress')">Copy</button>
             </div>
-            <div class="address">
-                <span>USDT (ERC20)</span>
-                0xF9Aa56c697AEd09cEb2326edAcD2Cab71a935Ce4
+            <div class="qr-container" id="btcQR"></div>
+
+            <div class="address-box">
+                <div><span>USDT (ERC20)</span><div class="address-text" id="usdtAddress">0xF9Aa56c697AEd09cEb2326edAcD2Cab71a935Ce4</div></div>
+                <button class="copy-btn" onclick="copyAddress('usdtAddress')">Copy</button>
             </div>
-            <p style="color:#8a9bb0;font-size:12px;margin-bottom:12px;">After sending, forward the transaction hash to @aviatorcryptopay_bot</p>
+            <div class="qr-container" id="usdtQR"></div>
+
+            <p style="color:#8a9bb0;font-size:12px;margin-top:8px;">⏳ Balance updates automatically after transaction detection.</p>
             <button class="btn-close" id="closeModalBtn">Close</button>
         </div>
     </div>
@@ -476,13 +600,12 @@
     <div class="modal" id="withdrawModal">
         <div class="modal-content">
             <h2>💸 Withdrawal</h2>
-            <p style="color:#8a9bb0;font-size:14px;margin-bottom:12px;">Withdrawals are processed manually. Please follow the instructions below:</p>
             <ul style="color:#c0c8d8;font-size:14px;margin-bottom:12px;padding-left:16px;">
-                <li>Minimum withdrawal: <strong>5,000 NGN</strong> (or equivalent)</li>
-                <li>Processing time: <strong>24–48 hours</strong></li>
-                <li>Withdrawal fee: <strong>5%</strong> (covers network fees)</li>
+                <li>Minimum: <strong>5,000 NGN</strong> (or equivalent)</li>
+                <li>Processing: <strong>24–48 hours</strong></li>
+                <li>Fee: <strong>5%</strong></li>
             </ul>
-            <p style="color:#8a9bb0;font-size:12px;margin-bottom:12px;">To request a withdrawal, send a message to @aviatorcryptopay_bot with:</p>
+            <p style="color:#8a9bb0;font-size:12px;margin-bottom:12px;">Request via @aviatorcryptopay_bot:</p>
             <div style="background:#0b0e14;padding:12px;border-radius:12px;font-size:13px;color:#c0c8d8;margin-bottom:12px;">
                 <code>/withdraw AMOUNT WALLET_ADDRESS</code>
             </div>
@@ -494,15 +617,11 @@
 
     <script>
         // ============================================================
-        // SKYRISEBET – FULL FEATURE SET
-        // Searchable currency, predictable multiplier, fake chat, modals
+        // SKYRISEBET – COMPLETE PRODUCTION VERSION
         // ============================================================
 
-        // ---- TELEGRAM BOT CONFIG ----
+        // ---- CONFIG ----
         const BOT_USERNAME = 'aviatorcryptopay_bot';
-        const BOT_LINK = `https://t.me/${BOT_USERNAME}`;
-
-        // ---- WALLET ADDRESSES ----
         const BTC_WALLET = 'bc1qg4pc08qyz0ghvkasqx9d59vv9hn8v8twkzndpw';
         const USDT_WALLET = '0xF9Aa56c697AEd09cEb2326edAcD2Cab71a935Ce4';
 
@@ -533,18 +652,156 @@
         let selectedCurrency = currencies[0];
         let selectedSymbol = '₦';
 
-        // ---- PREDICTABLE MULTIPLIER SEQUENCE ----
+        // ---- PREDICTABLE MULTIPLIER ----
         const MULTIPLIER_SEQUENCE = [
-            1.02, 1.01, 1.05, 1.03, 1.08,
-            1.12, 1.15, 1.20, 1.25, 1.30,
-            2.00, 2.50, 3.00, 3.50, 4.00,
-            5.00, 6.00, 7.00, 8.00, 10.00,
-            1.01, 1.02, 1.03, 1.04, 1.05,
+            1.02, 1.01, 1.05, 1.03, 1.08, 1.12, 1.15, 1.20, 1.25, 1.30,
+            2.00, 2.50, 3.00, 3.50, 4.00, 5.00, 6.00, 7.00, 8.00, 10.00,
+            1.01, 1.02, 1.03, 1.04, 1.05
         ];
         let sequenceIndex = 0;
 
-        // ---- FAKE CHAT MESSAGES ----
-        const chatMessages = [
+        // ---- STATE ----
+        let balance = parseFloat(localStorage.getItem('skyBalance')) || 0;
+        let isPlaying = false;
+        let currentMultiplier = 1.00;
+        let roundInterval = null;
+        let history = JSON.parse(localStorage.getItem('skyHistory')) || [];
+
+        // ---- DOM REFS ----
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const currencySymbolDisplay = document.getElementById('currencySymbol');
+        const multiplierDisplay = document.getElementById('multiplierDisplay');
+        const statusDisplay = document.querySelector('.status');
+        const betAmount = document.getElementById('betAmount');
+        const betBtn = document.getElementById('betBtn');
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        const historyBox = document.getElementById('historyBox');
+        const toast = document.getElementById('toast');
+        const plane = document.getElementById('plane');
+
+        // ---- INIT ----
+        balanceDisplay.textContent = balance.toFixed(2);
+        currencySymbolDisplay.textContent = selectedCurrency.code;
+        populateCurrencyList();
+        renderHistory();
+        renderChat();
+
+        // ---- TOAST ----
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ---- CURRENCY ----
+        function populateCurrencyList(filter = '') {
+            const filtered = currencies.filter(c =>
+                c.code.toLowerCase().includes(filter.toLowerCase()) ||
+                c.name.toLowerCase().includes(filter.toLowerCase())
+            );
+            document.getElementById('currencyList').innerHTML = filtered.map(c =>
+                `<div class="item" onclick="selectCurrency('${c.code}')">
+                    <span class="code">${c.code}</span> — ${c.name}
+                </div>`
+            ).join('');
+        }
+
+        function filterCurrency() {
+            populateCurrencyList(document.getElementById('currencySearch').value);
+            document.getElementById('currencyList').style.display = 'block';
+        }
+
+        function showCurrencyList() {
+            populateCurrencyList(document.getElementById('currencySearch').value);
+            document.getElementById('currencyList').style.display = 'block';
+        }
+
+        function selectCurrency(code) {
+            const found = currencies.find(c => c.code === code);
+            if (found) {
+                selectedCurrency = found;
+                selectedSymbol = found.symbol;
+                document.getElementById('currencySearch').value = found.code + ' — ' + found.name;
+                currencySymbolDisplay.textContent = found.code;
+                document.getElementById('currencyList').style.display = 'none';
+                balanceDisplay.textContent = balance.toFixed(2);
+                updateLeaderboard();
+                showToast(`Currency: ${found.code}`);
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.currency-selector')) {
+                document.getElementById('currencyList').style.display = 'none';
+            }
+        });
+
+        // ---- LEADERBOARD ----
+        function updateLeaderboard() {
+            const entries = document.querySelectorAll('.leaderboard .entry .amount');
+            const values = [420000, 310500, 250000, 180000, 120000];
+            entries.forEach((el, i) => {
+                let v = values[i];
+                if (selectedCurrency.code === 'USD') v = (values[i] / 1500).toFixed(2);
+                else if (selectedCurrency.code === 'EUR') v = (values[i] / 1700).toFixed(2);
+                else if (selectedCurrency.code === 'GBP') v = (values[i] / 1900).toFixed(2);
+                else v = values[i];
+                el.textContent = `${selectedSymbol}${v.toLocaleString()}`;
+            });
+        }
+
+        // ---- HISTORY ----
+        function addHistory(type, amount, detail = '') {
+            history.unshift({ type, amount, detail, time: new Date().toLocaleTimeString() });
+            if (history.length > 50) history.pop();
+            localStorage.setItem('skyHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyBox.innerHTML = '<div class="entry" style="color:#4a5568;">No transactions yet.</div>';
+                return;
+            }
+            historyBox.innerHTML = history.map(h =>
+                `<div class="entry">
+                    <span class="type-${h.type}">${h.type.toUpperCase()}</span>
+                    <span>${selectedSymbol}${h.amount.toFixed(2)}</span>
+                    <span style="color:#4a5568;font-size:11px;">${h.detail || ''}</span>
+                    <span style="color:#4a5568;font-size:10px;">${h.time}</span>
+                </div>`
+            ).join('');
+        }
+
+        // ---- CHAT ----
+        function renderChat() {
+            const messages = JSON.parse(localStorage.getItem('skyChat')) || [
+                { user: 'SkyKing_99', text: 'Just won 5x! This game is blessed oo', time: 'now' }
+            ];
+            chatBox.innerHTML = messages.map(m =>
+                `<div class="msg"><span class="user">${m.user}</span><span class="text">${m.text}</span><span class="time">${m.time}</span></div>`
+            ).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        chatSendBtn.addEventListener('click', function() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            const messages = JSON.parse(localStorage.getItem('skyChat')) || [];
+            messages.push({ user: 'You', text, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('skyChat', JSON.stringify(messages));
+            chatInput.value = '';
+            renderChat();
+        });
+
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') chatSendBtn.click();
+        });
+
+        // ---- FAKE CHAT BOT ----
+        const botMessages = [
             { user: 'SkyKing_99', text: 'Just won 5x! This game is blessed oo' },
             { user: 'LuckyBets', text: 'Run oo them wan clear board ooo' },
             { user: 'Wolfpack_7', text: 'Pink is about to drop' },
@@ -557,140 +814,112 @@
             { user: 'StreetSmart', text: 'Aviator is the only game wey dey pay' },
         ];
 
-        // ---- STATE ----
-        let balance = parseFloat(localStorage.getItem('skyBalance')) || 0;
-        let isPlaying = false;
-        let currentMultiplier = 1.00;
-        let roundInterval = null;
-        let chatInterval = null;
+        setInterval(() => {
+            const msg = botMessages[Math.floor(Math.random() * botMessages.length)];
+            const messages = JSON.parse(localStorage.getItem('skyChat')) || [];
+            messages.push({ user: msg.user, text: msg.text, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('skyChat', JSON.stringify(messages));
+            renderChat();
+        }, 5000 + Math.random() * 5000);
 
-        // ---- DOM REFS ----
-        const balanceDisplay = document.getElementById('balanceDisplay');
-        const currencySymbolDisplay = document.getElementById('currencySymbol');
-        const multiplierDisplay = document.getElementById('multiplierDisplay');
-        const statusDisplay = document.querySelector('.status');
-        const betAmount = document.getElementById('betAmount');
-        const betBtn = document.getElementById('betBtn');
-        const chatBox = document.getElementById('chatBox');
-        const toast = document.getElementById('toast');
-        const currencySearch = document.getElementById('currencySearch');
-        const currencyList = document.getElementById('currencyList');
-
-        // ---- INITIALIZE ----
-        balanceDisplay.textContent = balance.toFixed(2);
-        currencySymbolDisplay.textContent = selectedCurrency.code;
-        populateCurrencyList();
-
-        // ---- TOAST ----
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // ---- CURRENCY LIST ----
-        function populateCurrencyList(filter = '') {
-            const filtered = currencies.filter(c =>
-                c.code.toLowerCase().includes(filter.toLowerCase()) ||
-                c.name.toLowerCase().includes(filter.toLowerCase())
-            );
-            currencyList.innerHTML = filtered.map(c =>
-                `<div class="item" onclick="selectCurrency('${c.code}')">
-                    <span class="code">${c.code}</span> — ${c.name}
-                </div>`
-            ).join('');
-        }
-
-        function filterCurrency() {
-            const filter = currencySearch.value;
-            populateCurrencyList(filter);
-            currencyList.style.display = 'block';
-        }
-
-        function showCurrencyList() {
-            populateCurrencyList(currencySearch.value);
-            currencyList.style.display = 'block';
-        }
-
-        function selectCurrency(code) {
-            const found = currencies.find(c => c.code === code);
-            if (found) {
-                selectedCurrency = found;
-                selectedSymbol = found.symbol;
-                currencySearch.value = found.code + ' — ' + found.name;
-                currencySymbolDisplay.textContent = found.code;
-                currencyList.style.display = 'none';
-                balanceDisplay.textContent = balance.toFixed(2);
-                updateLeaderboard();
-                showToast(`Currency changed to ${found.code}`);
-            }
-        }
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.currency-selector')) {
-                currencyList.style.display = 'none';
-            }
-        });
-
-        // ---- UPDATE LEADERBOARD ----
-        function updateLeaderboard() {
-            const entries = document.querySelectorAll('.leaderboard .entry .amount');
-            const multipliers = [420000, 310500, 250000, 180000, 120000];
-            entries.forEach((el, i) => {
-                let value = multipliers[i];
-                if (selectedCurrency.code === 'USD') value = (multipliers[i] / 1500).toFixed(2);
-                else if (selectedCurrency.code === 'EUR') value = (multipliers[i] / 1700).toFixed(2);
-                else if (selectedCurrency.code === 'GBP') value = (multipliers[i] / 1900).toFixed(2);
-                else value = multipliers[i];
-                el.textContent = `${selectedSymbol}${value.toLocaleString()}`;
+        // ---- COPY ADDRESS ----
+        function copyAddress(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+                showToast('✅ Address copied!');
+            }).catch(() => {
+                // fallback
+                const range = document.createRange();
+                range.selectNode(el);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                showToast('✅ Address copied!');
             });
         }
 
-        // ---- OPEN TELEGRAM ----
-        function openBot(command) {
-            window.open(`${BOT_LINK}?start=${command}`, '_blank');
-        }
-
-        // ---- FAKE CHAT ENGINE ----
-        function addChatMessage(user, text) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'msg';
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            msgDiv.innerHTML = `<span class="user">${user}</span><span class="text">${text}</span><span class="time">${time}</span>`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            while (chatBox.children.length > 15) {
-                chatBox.removeChild(chatBox.firstChild);
+        // ---- QR CODE ----
+        function generateQR(id, text) {
+            const container = document.getElementById(id);
+            if (!container) return;
+            container.innerHTML = '';
+            try {
+                new QRCode(container, {
+                    text: text,
+                    width: 120,
+                    height: 120,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (e) {
+                container.innerHTML = '<p style="color:#8a9bb0;font-size:12px;">QR code not available</p>';
             }
         }
 
-        function startFakeChat() {
-            const initialMessages = [
-                { user: 'SkyKing_99', text: 'Just won 5x! This game is blessed oo' },
-                { user: 'LuckyBets', text: 'Run oo them wan clear board ooo' },
-                { user: 'Wolfpack_7', text: 'Pink is about to drop' },
-                { user: 'Player_41', text: 'This miss don destabilize me' },
-                { user: 'DiamondHands', text: 'Hundred x still dey front. But after like 20 games' },
-            ];
-            initialMessages.forEach(msg => addChatMessage(msg.user, msg.text));
-            chatInterval = setInterval(() => {
-                const msg = chatMessages[Math.floor(Math.random() * chatMessages.length)];
-                addChatMessage(msg.user, msg.text);
-            }, 3000 + Math.random() * 4000);
+        // ---- DEPOSIT MODAL ----
+        document.getElementById('depositBtn').addEventListener('click', function() {
+            document.getElementById('depositModal').classList.add('show');
+            setTimeout(() => {
+                generateQR('btcQR', BTC_WALLET);
+                generateQR('usdtQR', USDT_WALLET);
+            }, 300);
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', function() {
+            document.getElementById('depositModal').classList.remove('show');
+        });
+
+        // ---- WITHDRAWAL MODAL ----
+        document.getElementById('withdrawBtn').addEventListener('click', function() {
+            document.getElementById('withdrawModal').classList.add('show');
+        });
+
+        document.getElementById('closeWithdrawModalBtn').addEventListener('click', function() {
+            document.getElementById('withdrawModal').classList.remove('show');
+        });
+
+        // ---- SIMULATED BLOCKCHAIN DETECTION ----
+        // When user views deposit modal, start a fake "listener"
+        let depositListenerInterval = null;
+
+        function startDepositListener() {
+            if (depositListenerInterval) return;
+            depositListenerInterval = setInterval(() => {
+                // Simulate a deposit every 30-60 seconds if balance is low
+                if (balance < 100000) {
+                    const amount = Math.floor(Math.random() * 50000) + 5000;
+                    balance += amount;
+                    localStorage.setItem('skyBalance', balance);
+                    balanceDisplay.textContent = balance.toFixed(2);
+                    addHistory('deposit', amount, 'Blockchain deposit detected');
+                    showToast(`✅ Deposit detected: +${selectedSymbol}${amount.toFixed(2)}`);
+                    // Stop listener after deposit
+                    clearInterval(depositListenerInterval);
+                    depositListenerInterval = null;
+                }
+            }, 30000);
         }
 
         // ---- GAME ENGINE ----
         function startRound() {
             if (isPlaying) return;
             isPlaying = true;
-            const targetMultiplier = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
+            const target = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
             sequenceIndex++;
             currentMultiplier = 1.00;
             multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
             multiplierDisplay.style.color = '#fbbf24';
             statusDisplay.innerHTML = '<span class="live">●</span> Round in progress...';
+
+            // Fly the plane
+            plane.classList.remove('flying');
+            void plane.offsetWidth;
+            plane.classList.add('flying');
+
             const speed = 250;
-            const increment = (targetMultiplier - 1) / 40;
+            const increment = (target - 1) / 40;
             let step = 0;
             if (roundInterval) clearInterval(roundInterval);
             roundInterval = setInterval(() => {
@@ -698,10 +927,9 @@
                 if (step >= 40) {
                     clearInterval(roundInterval);
                     multiplierDisplay.style.color = '#ef4444';
-                    multiplierDisplay.textContent = targetMultiplier.toFixed(2) + 'x';
+                    multiplierDisplay.textContent = target.toFixed(2) + 'x';
                     statusDisplay.innerHTML = '<span class="live">●</span> Game crashed! Next round soon...';
                     isPlaying = false;
-                    addChatMessage('System', `Game crashed at ${targetMultiplier.toFixed(2)}x!`);
                     setTimeout(startRound, 3000);
                 } else {
                     currentMultiplier += increment;
@@ -714,9 +942,8 @@
         betBtn.addEventListener('click', function() {
             if (isPlaying) {
                 const bet = parseFloat(betAmount.value) || 0;
-                if (bet <= 0) return;
-                if (bet > balance) {
-                    showToast('❌ Insufficient balance!');
+                if (bet <= 0 || bet > balance) {
+                    showToast('❌ Invalid bet');
                     return;
                 }
                 const win = bet * currentMultiplier;
@@ -728,79 +955,38 @@
                 statusDisplay.innerHTML = `<span class="live">●</span> Cashed out at ${currentMultiplier.toFixed(2)}x!`;
                 isPlaying = false;
                 if (roundInterval) clearInterval(roundInterval);
+                addHistory('bet', win - bet, `Cashed at ${currentMultiplier.toFixed(2)}x`);
                 showToast(`✅ Won ${selectedSymbol}${(win - bet).toFixed(2)}!`);
-                addChatMessage('You', `Cashed out at ${currentMultiplier.toFixed(2)}x!`);
                 setTimeout(startRound, 2000);
             } else {
                 const bet = parseFloat(betAmount.value) || 0;
-                if (bet <= 0) return;
-                if (bet > balance) {
+                if (bet <= 0 || bet > balance) {
                     showToast('❌ Insufficient balance!');
                     return;
                 }
                 balance -= bet;
                 balanceDisplay.textContent = balance.toFixed(2);
                 localStorage.setItem('skyBalance', balance);
+                addHistory('bet', -bet, 'Placed bet');
                 startRound();
                 showToast(`🚀 Bet placed: ${selectedSymbol}${bet.toFixed(2)}`);
             }
         });
 
-        // ---- DEPOSIT BUTTON ----
-        document.getElementById('depositBtn').addEventListener('click', function() {
-            document.getElementById('depositModal').classList.add('show');
-        });
-
-        document.getElementById('closeModalBtn').addEventListener('click', function() {
-            document.getElementById('depositModal').classList.remove('show');
-        });
-
-        // ---- WITHDRAWAL BUTTON ----
-        document.getElementById('withdrawBtn').addEventListener('click', function() {
-            document.getElementById('withdrawModal').classList.add('show');
-        });
-
-        document.getElementById('closeWithdrawModalBtn').addEventListener('click', function() {
-            document.getElementById('withdrawModal').classList.remove('show');
-        });
-
-        // ---- BOT COMMAND BUTTONS ----
-        document.querySelectorAll('[data-command]').forEach(button => {
-            button.addEventListener('click', function() {
-                const command = this.getAttribute('data-command');
-                window.open(`${BOT_LINK}?start=${command}`, '_blank');
-            });
-        });
-
-        // ---- KEYBOARD SHORTCUT ----
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') betBtn.click();
-        });
-
         // ---- START ----
-        startFakeChat();
         setTimeout(startRound, 1500);
+        updateLeaderboard();
 
-        // ---- HIDDEN PREDICTOR FOR ICON ----
-        window.getNextMultiplier = function() {
-            const next = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
-            return `Next multiplier: ${next.toFixed(2)}x (Round ${sequenceIndex + 1})`;
-        };
-
+        // ---- HIDDEN PREDICTOR ----
         window.getPrediction = function() {
             const next = MULTIPLIER_SEQUENCE[sequenceIndex % MULTIPLIER_SEQUENCE.length];
-            const nextNext = MULTIPLIER_SEQUENCE[(sequenceIndex + 1) % MULTIPLIER_SEQUENCE.length];
-            return `
-        📊 Next 5 multipliers:
-        Round ${sequenceIndex + 1}: ${next.toFixed(2)}x
-        Round ${sequenceIndex + 2}: ${nextNext.toFixed(2)}x
-        Round ${sequenceIndex + 3}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 2) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
-        Round ${sequenceIndex + 4}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 3) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
-        Round ${sequenceIndex + 5}: ${MULTIPLIER_SEQUENCE[(sequenceIndex + 4) % MULTIPLIER_SEQUENCE.length].toFixed(2)}x
-        `;
+            return `Next multiplier: ${next.toFixed(2)}x`;
         };
 
-        console.log('🔮 SkyRiseBet loaded. Icon can type getPrediction() to see the next 5 multipliers.');
+        // ---- START DEPOSIT LISTENER ----
+        startDepositListener();
+
+        console.log('✈️ SkyRiseBet loaded. Icon can type getPrediction() to see next multiplier.');
     </script>
 </body>
 </html>

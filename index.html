@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Aviator - SkyRiseBet</title>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0b0e14;
@@ -166,7 +165,6 @@
       transform: rotate(-90deg);
       color: #ef4444;
     }
-    /* Huge multiplier animation */
     .huge-multiplier {
       animation: pulse 0.5s ease-in-out;
     }
@@ -292,34 +290,6 @@
     .bet-controls .btn-bet:active { transform: scale(0.96); }
     .bet-controls .btn-bet:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== WITHDRAWAL LOCK ===== */
-    .withdraw-lock {
-      background: #1a202a;
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #8a9bb0;
-      border: 1px solid #2a2f3a;
-    }
-    .withdraw-lock .lock-icon { color: #fbbf24; }
-    .withdraw-lock .progress {
-      background: #2a2f3a;
-      border-radius: 10px;
-      height: 6px;
-      width: 120px;
-      overflow: hidden;
-    }
-    .withdraw-lock .progress .fill {
-      height: 100%;
-      background: #fbbf24;
-      width: 0%;
-      transition: width 0.3s;
-    }
-
     /* ===== ACTION BUTTONS ===== */
     .action-buttons {
       display: flex;
@@ -339,7 +309,6 @@
     .action-buttons button:active { transform: scale(0.96); }
     .btn-deposit { background: #1a73e8; color: #fff; }
     .btn-withdraw { background: #22c55e; color: #fff; }
-    .btn-withdraw:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ===== DEPOSIT MODAL ===== */
     .modal {
@@ -514,12 +483,6 @@
     <input type="number" id="targetMultiplier" placeholder="e.g. 2.50" step="0.01" min="1.01" value="2.50" />
   </div>
 
-  <!-- ===== WITHDRAWAL LOCK ===== -->
-  <div class="withdraw-lock">
-    <span><span class="lock-icon">🔒</span> Withdraw requires ₦100,000 total bet</span>
-    <div class="progress"><div class="fill" id="withdrawProgress" style="width:0%;"></div></div>
-  </div>
-
   <!-- ===== BET CONTROLS ===== -->
   <div class="bet-controls">
     <input type="number" id="betAmount" placeholder="Amount" value="50" step="10" min="10" />
@@ -536,7 +499,7 @@
   <!-- ===== ACTION BUTTONS ===== -->
   <div class="action-buttons">
     <button class="btn-deposit" id="depositBtn">💰 Deposit</button>
-    <button class="btn-withdraw" id="withdrawBtn" disabled>💸 Withdraw</button>
+    <button class="btn-withdraw" id="withdrawBtn">💸 Withdraw</button>
   </div>
 
   <!-- ===== TOP WINNERS ===== -->
@@ -577,7 +540,7 @@
 
 <script>
   // ============================================================
-  // SKYRISEBET — COMPLETE AVIATOR
+  // SKYRISEBET — COMPLETE AVIATOR (WITHDRAW FIX)
   // ============================================================
 
   // ---- STATE ----
@@ -602,7 +565,6 @@
   const chatBox = document.getElementById('chatBox');
   const toast = document.getElementById('toast');
   const loader = document.getElementById('loaderScreen');
-  const withdrawProgress = document.getElementById('withdrawProgress');
   const totalPayoutEl = document.getElementById('totalPayout');
   const onlineCount = document.getElementById('onlineCount');
   const plane = document.getElementById('plane');
@@ -627,31 +589,14 @@
         el.textContent = (currency === 'NGN' ? '₦' : '$') + val.toLocaleString();
       }
     });
-    // Update total payout symbol
     const payoutVal = parseFloat(totalPayout);
     totalPayoutEl.textContent = (currency === 'NGN' ? '₦' : '$') + payoutVal.toLocaleString();
-  }
-
-  // ---- WITHDRAW BUTTON LOGIC ----
-  function updateWithdrawButton() {
-    const progress = Math.min((totalBet / 100000) * 100, 100);
-    if (totalBet >= 100000) {
-      withdrawBtn.disabled = false;
-      withdrawBtn.textContent = '💸 Withdraw (Unlocked)';
-      withdrawBtn.style.opacity = '1';
-    } else {
-      withdrawBtn.disabled = true;
-      withdrawBtn.textContent = `💸 Withdraw (${((100000 - totalBet) / 1000).toFixed(0)}k NGN left)`;
-      withdrawBtn.style.opacity = '0.6';
-    }
   }
 
   // ---- INIT ----
   balanceDisplay.textContent = balance.toFixed(2);
   currencySymbol.textContent = currency;
   totalPayoutEl.textContent = `₦${totalPayout.toLocaleString()}`;
-  updateWithdrawProgress();
-  updateWithdrawButton();
   renderHistory();
   setTimeout(() => loader.classList.add('hidden'), 1200);
 
@@ -668,14 +613,6 @@
     balance = parseFloat(amount.toFixed(2));
     balanceDisplay.textContent = balance.toFixed(2);
     localStorage.setItem('skyBalance', balance);
-  }
-
-  // ---- UPDATE WITHDRAW PROGRESS ----
-  function updateWithdrawProgress() {
-    const progress = Math.min((totalBet / 100000) * 100, 100);
-    withdrawProgress.style.width = progress + '%';
-    localStorage.setItem('skyTotalBet', totalBet);
-    updateWithdrawButton();
   }
 
   // ---- RENDER HISTORY ----
@@ -758,7 +695,7 @@
 
     updateBalance(balance - bet);
     totalBet += bet;
-    updateWithdrawProgress();
+    localStorage.setItem('skyTotalBet', totalBet);
 
     isPlaying = true;
     betBtn.disabled = true;
@@ -783,7 +720,6 @@
       multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
       updatePlane(currentMultiplier, crashPoint + 1);
 
-      // Show huge multiplier effect
       if (currentMultiplier >= 5) {
         multiplierDisplay.classList.add('huge-multiplier');
         setTimeout(() => multiplierDisplay.classList.remove('huge-multiplier'), 500);
@@ -866,10 +802,10 @@
     }
   });
 
-  // ---- WITHDRAW ----
+  // ---- WITHDRAW (Lock shows only on click) ----
   withdrawBtn.addEventListener('click', function() {
     if (totalBet < 100000) {
-      showToast('❌ You need to bet ₦100,000 total to withdraw.');
+      showToast('🔒 Withdrawal requires ₦100,000 total bet. You have ₦' + totalBet.toFixed(0) + ' so far.');
       return;
     }
     showToast('💸 Withdrawal request submitted. Processing within 24 hours.');

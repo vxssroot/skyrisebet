@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Aviator - SkyRiseBet</title>
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0b0e14;
@@ -62,6 +61,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
     }
     .header h1 {
       font-size: 20px;
@@ -76,6 +77,29 @@
       color: #8a9bb0;
     }
     .header .balance span { color: #fbbf24; font-weight: 600; }
+    .currency-toggle {
+      background: #1a202a;
+      border: 1px solid #2a2f3a;
+      border-radius: 20px;
+      padding: 2px 4px;
+      display: flex;
+      gap: 2px;
+    }
+    .currency-toggle button {
+      background: transparent;
+      border: none;
+      color: #8a9bb0;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .currency-toggle button.active {
+      background: #fbbf24;
+      color: #0b0e14;
+    }
 
     /* ===== LIVE STATS ===== */
     .live-stats {
@@ -98,8 +122,9 @@
       text-align: center;
       border: 1px solid #2a2f3a;
       margin-bottom: 12px;
-      min-height: 180px;
+      min-height: 200px;
       position: relative;
+      overflow: hidden;
     }
     .game-area .multiplier {
       font-size: 48px;
@@ -107,14 +132,38 @@
       color: #fbbf24;
       letter-spacing: -2px;
       transition: color 0.15s;
+      position: relative;
+      z-index: 2;
     }
     .game-area .status {
       font-size: 12px;
       color: #8a9bb0;
       margin-top: 2px;
+      position: relative;
+      z-index: 2;
     }
     .game-area .status .live { color: #22c55e; font-weight: 600; }
     .game-area .status .crashed { color: #ef4444; font-weight: 600; }
+    .game-area .plane {
+      position: absolute;
+      bottom: 20%;
+      left: 10%;
+      font-size: 32px;
+      transition: all 0.1s linear;
+      z-index: 1;
+      transform: rotate(-15deg);
+    }
+    .game-area .plane.flying {
+      bottom: 80%;
+      left: 80%;
+      transform: rotate(45deg);
+    }
+    .game-area .plane.crashed {
+      bottom: 10%;
+      left: 90%;
+      transform: rotate(-90deg);
+      color: #ef4444;
+    }
 
     /* ===== ROUND HISTORY ===== */
     .history {
@@ -142,6 +191,7 @@
       font-size: 10px;
       color: #4a5568;
       margin-bottom: 10px;
+      flex-wrap: wrap;
     }
     .trust-badges span {
       background: #1a202a;
@@ -150,6 +200,30 @@
       border: 1px solid #2a2f3a;
     }
     .trust-badges .highlight { color: #fbbf24; border-color: #fbbf24; }
+
+    /* ===== TARGET MULTIPLIER ===== */
+    .target-section {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .target-section label {
+      font-size: 12px;
+      color: #8a9bb0;
+      white-space: nowrap;
+    }
+    .target-section input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #2a2f3a;
+      background: #0b0e14;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+    .target-section input:focus { border-color: #fbbf24; }
 
     /* ===== BET CONTROLS ===== */
     .bet-controls {
@@ -301,52 +375,13 @@
     }
     .toast.show { opacity: 1; }
 
-    /* ===== SETTINGS ===== */
-    .settings-toggle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: #1a202a;
-      border: 1px solid #2a2f3a;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      color: #8a9bb0;
-      transition: 0.15s;
-      z-index: 50;
-    }
-    .settings-toggle:hover { background: #2a2f3a; color: #fff; }
-    .settings-panel {
-      display: none;
-      background: #0b0e14;
-      border: 1px solid #2a2f3a;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-top: 8px;
-      font-size: 13px;
-      color: #8a9bb0;
-    }
-    .settings-panel.show { display: block; }
-    .settings-panel label {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px solid #1a202a;
-    }
-    .settings-panel label:last-child { border-bottom: none; }
-    .settings-panel input[type="checkbox"] { accent-color: #fbbf24; }
-
     @media (max-width: 480px) {
       .container { padding: 12px 10px 16px; }
       .game-area .multiplier { font-size: 38px; }
       .bet-controls input { font-size: 13px; padding: 8px 10px; }
       .bet-controls .btn-bet { font-size: 13px; padding: 8px 12px; }
       .bet-controls .quick-bets button { font-size: 11px; padding: 6px 8px; }
+      .target-section { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -360,25 +395,16 @@
     <div class="loader-text">Loading <span>SkyRiseBet</span>...</div>
   </div>
 
-  <!-- ===== SETTINGS TOGGLE ===== -->
-  <div class="settings-toggle" id="settingsToggle">⚙️</div>
-
-  <!-- ===== SETTINGS PANEL ===== -->
-  <div class="settings-panel" id="settingsPanel">
-    <label><span>🔊 Sound</span> <input type="checkbox" checked /></label>
-    <label><span>🎵 Music</span> <input type="checkbox" checked /></label>
-    <label><span>🎬 Animation</span> <input type="checkbox" checked /></label>
-    <label><span>🎁 Free Bets</span> <input type="checkbox" /></label>
-    <label><span>📜 My Bet History</span> <input type="checkbox" /></label>
-    <label><span>⚖️ Game Limits</span> <input type="checkbox" /></label>
-    <label><span>📖 How To Play</span> <input type="checkbox" /></label>
-    <label><span>🔒 Provably Fair</span> <input type="checkbox" checked disabled /></label>
-  </div>
-
   <!-- ===== HEADER ===== -->
   <div class="header">
     <h1>✈️ Aviator</h1>
-    <div class="balance">💰 <span id="balanceDisplay">100.00</span> <span style="font-size:10px;color:#6b7280;">NGN</span></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="balance">💰 <span id="balanceDisplay">100.00</span> <span id="currencySymbol" style="font-size:10px;color:#6b7280;">NGN</span></div>
+      <div class="currency-toggle">
+        <button class="active" data-currency="NGN" onclick="setCurrency('NGN')">₦</button>
+        <button data-currency="USD" onclick="setCurrency('USD')">$</button>
+      </div>
+    </div>
   </div>
 
   <!-- ===== LIVE STATS ===== -->
@@ -396,9 +422,16 @@
 
   <!-- ===== GAME AREA ===== -->
   <div class="game-area" id="gameArea">
+    <div class="plane" id="plane">✈️</div>
     <div class="multiplier" id="multiplierDisplay">1.00x</div>
     <div class="status"><span class="live" id="gameStatus">● Waiting for next round...</span></div>
     <div class="history" id="history"></div>
+  </div>
+
+  <!-- ===== TARGET MULTIPLIER ===== -->
+  <div class="target-section">
+    <label>🎯 Cash-out at:</label>
+    <input type="number" id="targetMultiplier" placeholder="e.g. 2.50" step="0.01" min="1.01" value="2.50" />
   </div>
 
   <!-- ===== WITHDRAWAL LOCK ===== -->
@@ -444,7 +477,7 @@
 
 <script>
   // ============================================================
-  // SKYRISEBET — SPORTYBET-STYLE AVIATOR
+  // SKYRISEBET — AVIATOR WITH PLANE + TARGET INPUT + CURRENCY
   // ============================================================
 
   // ---- STATE ----
@@ -455,13 +488,16 @@
   let gameInterval = null;
   let history = JSON.parse(localStorage.getItem('skyHistory')) || [];
   let totalPayout = parseFloat(localStorage.getItem('skyTotalPayout')) || 12450000;
+  let currency = 'NGN';
 
   // ---- DOM REFS ----
   const balanceDisplay = document.getElementById('balanceDisplay');
+  const currencySymbol = document.getElementById('currencySymbol');
   const multiplierDisplay = document.getElementById('multiplierDisplay');
   const gameStatus = document.getElementById('gameStatus');
   const betAmount = document.getElementById('betAmount');
   const betBtn = document.getElementById('betBtn');
+  const targetMultiplier = document.getElementById('targetMultiplier');
   const historyEl = document.getElementById('history');
   const chatBox = document.getElementById('chatBox');
   const toast = document.getElementById('toast');
@@ -469,9 +505,32 @@
   const withdrawProgress = document.getElementById('withdrawProgress');
   const totalPayoutEl = document.getElementById('totalPayout');
   const onlineCount = document.getElementById('onlineCount');
+  const plane = document.getElementById('plane');
+
+  // ---- CURRENCY ----
+  function setCurrency(curr) {
+    currency = curr;
+    document.querySelectorAll('.currency-toggle button').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-currency="${curr}"]`).classList.add('active');
+    currencySymbol.textContent = curr;
+    updateBalanceDisplay();
+  }
+
+  function updateBalanceDisplay() {
+    const symbol = currency === 'NGN' ? '₦' : '$';
+    balanceDisplay.textContent = balance.toFixed(2);
+    currencySymbol.textContent = currency;
+    document.querySelectorAll('.top-winners .amount').forEach(el => {
+      const val = parseFloat(el.textContent.replace(/[₦$]/g, '').replace(/,/g, ''));
+      if (!isNaN(val)) {
+        el.textContent = (currency === 'NGN' ? '₦' : '$') + val.toLocaleString();
+      }
+    });
+  }
 
   // ---- INIT ----
   balanceDisplay.textContent = balance.toFixed(2);
+  currencySymbol.textContent = currency;
   totalPayoutEl.textContent = `₦${totalPayout.toLocaleString()}`;
   updateWithdrawProgress();
   renderHistory();
@@ -516,7 +575,7 @@
   setInterval(() => {
     const increment = Math.floor(Math.random() * 50000) + 10000;
     totalPayout += increment;
-    totalPayoutEl.textContent = `₦${totalPayout.toLocaleString()}`;
+    totalPayoutEl.textContent = (currency === 'NGN' ? '₦' : '$') + totalPayout.toLocaleString();
     localStorage.setItem('skyTotalPayout', totalPayout);
   }, 12000);
 
@@ -527,11 +586,6 @@
       this.classList.add('active');
       betAmount.value = this.getAttribute('data-amount');
     });
-  });
-
-  // ---- SETTINGS TOGGLE ----
-  document.getElementById('settingsToggle').addEventListener('click', function() {
-    document.getElementById('settingsPanel').classList.toggle('show');
   });
 
   // ---- FAKE CHAT ----
@@ -556,6 +610,16 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }, 4000);
 
+  // ---- UPDATE PLANE POSITION ----
+  function updatePlane(multiplier, maxMultiplier) {
+    const progress = Math.min(multiplier / maxMultiplier, 1);
+    const x = 10 + progress * 75; // 10% to 85%
+    const y = 20 + (1 - progress) * 60; // 80% to 20%
+    plane.style.left = x + '%';
+    plane.style.bottom = y + '%';
+    plane.style.transform = `rotate(${-15 + progress * 60}deg)`;
+  }
+
   // ---- GAME ENGINE (RIGGED) ----
   function startRound() {
     if (isPlaying) return;
@@ -563,6 +627,12 @@
     const bet = parseFloat(betAmount.value) || 0;
     if (bet <= 0 || bet > balance) {
       showToast('❌ Invalid bet or insufficient balance.');
+      return;
+    }
+
+    const target = parseFloat(targetMultiplier.value) || 2.50;
+    if (target < 1.01) {
+      showToast('❌ Target must be at least 1.01x.');
       return;
     }
 
@@ -578,8 +648,9 @@
     multiplierDisplay.textContent = '1.00x';
     multiplierDisplay.style.color = '#fbbf24';
     gameStatus.innerHTML = '<span class="live">● Round in progress...</span>';
+    plane.className = 'plane';
 
-    const crashPoint = 1.50 + Math.random() * 3.0;
+    const crashPoint = Math.max(1.01, target - 0.05);
     let step = 0;
     const steps = 25 + Math.floor(Math.random() * 15);
 
@@ -590,6 +661,7 @@
       const multiplier = 1 + progress * (crashPoint - 1);
       currentMultiplier = parseFloat(multiplier.toFixed(2));
       multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
+      updatePlane(currentMultiplier, crashPoint + 1);
 
       if (currentMultiplier >= crashPoint) {
         clearInterval(gameInterval);
@@ -598,6 +670,7 @@
         betBtn.textContent = 'Place Bet';
         multiplierDisplay.style.color = '#ef4444';
         gameStatus.innerHTML = `<span class="crashed">💥 Crashed at ${crashPoint.toFixed(2)}x</span>`;
+        plane.className = 'plane crashed';
         history.push({ value: crashPoint, crashed: true });
         renderHistory();
         localStorage.setItem('skyHistory', JSON.stringify(history));
@@ -606,6 +679,10 @@
           if (!isPlaying) {
             multiplierDisplay.style.color = '#fbbf24';
             gameStatus.innerHTML = '<span class="live">● Waiting for next round...</span>';
+            plane.className = 'plane';
+            plane.style.left = '10%';
+            plane.style.bottom = '20%';
+            plane.style.transform = 'rotate(-15deg)';
           }
         }, 2500);
       }
@@ -627,7 +704,12 @@
     history.push({ value: currentMultiplier, crashed: false });
     renderHistory();
     localStorage.setItem('skyHistory', JSON.stringify(history));
-    showToast(`✅ Won ₦${win.toFixed(2)} at ${currentMultiplier.toFixed(2)}x`);
+    const symbol = currency === 'NGN' ? '₦' : '$';
+    showToast(`✅ Won ${symbol}${win.toFixed(2)} at ${currentMultiplier.toFixed(2)}x`);
+    plane.className = 'plane';
+    plane.style.left = '10%';
+    plane.style.bottom = '20%';
+    plane.style.transform = 'rotate(-15deg)';
     setTimeout(() => {
       if (!isPlaying) {
         multiplierDisplay.style.color = '#fbbf24';

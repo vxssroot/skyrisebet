@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Aviator - SkyRiseBet</title>
-
   <style>
+    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0b0e14;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #fff;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 12px;
-      color: #fff;
       margin: 0;
     }
     .container {
@@ -29,13 +29,11 @@
       overflow: hidden;
     }
 
-    /* ===== LOADER SCREEN ===== */
+    /* ===== LOADER ===== */
     #loaderScreen {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: #0b0e14;
       display: flex;
       flex-direction: column;
@@ -43,27 +41,19 @@
       justify-content: center;
       z-index: 100;
       border-radius: 24px;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.4s ease;
     }
-    #loaderScreen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #loaderScreen.hidden { opacity: 0; pointer-events: none; }
     .loader-spinner {
-      width: 50px;
-      height: 50px;
+      width: 44px; height: 44px;
       border: 4px solid #2a2f3a;
       border-top: 4px solid #fbbf24;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .loader-text {
-      color: #8a9bb0;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-    }
+    @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+    .loader-text { color: #8a9bb0; font-size: 13px; letter-spacing: 0.5px; }
     .loader-text span { color: #fbbf24; font-weight: 600; }
 
     /* ===== HEADER ===== */
@@ -71,7 +61,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .header h1 {
       font-size: 20px;
@@ -93,50 +83,83 @@
       justify-content: space-between;
       font-size: 12px;
       color: #6b7280;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       padding: 0 4px;
     }
     .live-stats .online { color: #22c55e; }
     .live-stats .online::before { content: "● "; font-size: 10px; }
+    .live-stats .payout { color: #fbbf24; font-weight: 600; }
 
     /* ===== GAME AREA ===== */
     .game-area {
       background: #0b0e14;
       border-radius: 16px;
-      padding: 30px 10px 20px;
+      padding: 20px 10px 14px;
       text-align: center;
       border: 1px solid #2a2f3a;
-      position: relative;
       margin-bottom: 12px;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      min-height: 180px;
+      position: relative;
     }
     .game-area .multiplier {
-      font-size: 56px;
+      font-size: 48px;
       font-weight: 800;
       color: #fbbf24;
       letter-spacing: -2px;
       transition: color 0.15s;
     }
     .game-area .status {
-      font-size: 13px;
+      font-size: 12px;
       color: #8a9bb0;
-      margin-top: 4px;
+      margin-top: 2px;
     }
     .game-area .status .live { color: #22c55e; font-weight: 600; }
     .game-area .status .crashed { color: #ef4444; font-weight: 600; }
 
+    /* ===== ROUND HISTORY ===== */
+    .history {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .history .h-item {
+      background: #1a202a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #8a9bb0;
+      font-family: monospace;
+    }
+    .history .h-item.crashed { color: #ef4444; }
+
+    /* ===== TRUST BADGES ===== */
+    .trust-badges {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-size: 10px;
+      color: #4a5568;
+      margin-bottom: 10px;
+    }
+    .trust-badges span {
+      background: #1a202a;
+      padding: 2px 10px;
+      border-radius: 12px;
+      border: 1px solid #2a2f3a;
+    }
+    .trust-badges .highlight { color: #fbbf24; border-color: #fbbf24; }
+
     /* ===== BET CONTROLS ===== */
     .bet-controls {
       display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
     }
     .bet-controls input {
-      flex: 1;
+      flex: 2;
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid #2a2f3a;
@@ -144,12 +167,30 @@
       color: #fff;
       font-size: 14px;
       outline: none;
-      min-width: 0;
+      min-width: 80px;
     }
     .bet-controls input:focus { border-color: #fbbf24; }
     .bet-controls input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .bet-controls .quick-bets {
+      display: flex;
+      gap: 4px;
+      flex: 3;
+    }
+    .bet-controls .quick-bets button {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #2a2f3a;
+      background: transparent;
+      color: #8a9bb0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.15s;
+      flex: 1;
+    }
+    .bet-controls .quick-bets button:hover { background: #1a202a; color: #fff; }
+    .bet-controls .quick-bets button.active { background: #fbbf24; color: #0b0e14; border-color: #fbbf24; }
 
-    .bet-controls button {
+    .bet-controls .btn-bet {
       padding: 10px 16px;
       border-radius: 10px;
       border: none;
@@ -159,70 +200,87 @@
       font-size: 14px;
       cursor: pointer;
       transition: 0.15s;
-      white-space: nowrap;
+      flex: 1;
+      min-width: 80px;
     }
-    .bet-controls button:active { transform: scale(0.96); }
-    .bet-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .bet-controls .btn-bet:active { transform: scale(0.96); }
+    .bet-controls .btn-bet:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ===== CASH-OUT TARGET ===== */
-    .target-section {
+    /* ===== WITHDRAWAL LOCK ===== */
+    .withdraw-lock {
+      background: #1a202a;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-    }
-    .target-section label {
       font-size: 12px;
       color: #8a9bb0;
-      white-space: nowrap;
-    }
-    .target-section input {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 10px;
       border: 1px solid #2a2f3a;
-      background: #0b0e14;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-      width: 100%;
     }
-    .target-section input:focus { border-color: #fbbf24; }
-
-    /* ===== BUTTONS ===== */
-    .btn-deposit, .btn-withdraw {
-      width: 100%;
-      padding: 12px;
+    .withdraw-lock .lock-icon { color: #fbbf24; }
+    .withdraw-lock .progress {
+      background: #2a2f3a;
       border-radius: 10px;
-      border: none;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.15s;
-      margin-bottom: 8px;
+      height: 6px;
+      width: 120px;
+      overflow: hidden;
     }
-    .btn-deposit { background: #1a73e8; color: #fff; }
-    .btn-withdraw { background: #22c55e; color: #fff; }
-    .btn-deposit:active, .btn-withdraw:active { transform: scale(0.96); }
+    .withdraw-lock .progress .fill {
+      height: 100%;
+      background: #fbbf24;
+      width: 0%;
+      transition: width 0.3s;
+    }
 
-    /* ===== HISTORY ===== */
-    .history {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+    /* ===== TOP WINNERS ===== */
+    .top-winners {
+      background: #0b0e14;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid #2a2f3a;
       margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid #1a202a;
     }
-    .history .h-item {
-      background: #1a202a;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
+    .top-winners h4 {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .top-winners .entry {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 3px 0;
+      border-bottom: 1px solid #1a202a;
+    }
+    .top-winners .entry:last-child { border-bottom: none; }
+    .top-winners .entry .name { color: #e0e6f0; }
+    .top-winners .entry .amount { color: #fbbf24; font-weight: 600; }
+
+    /* ===== CHAT BOX ===== */
+    .chat-box {
+      background: #0b0e14;
+      border-radius: 12px;
+      padding: 8px 10px;
+      border: 1px solid #2a2f3a;
+      max-height: 100px;
+      overflow-y: auto;
+      margin-top: 8px;
+      font-size: 12px;
       color: #8a9bb0;
     }
-    .history .h-item.crashed { color: #ef4444; }
-    .history .h-item.win { color: #22c55e; }
+    .chat-box .msg {
+      padding: 3px 0;
+      border-bottom: 1px solid #1a202a;
+      display: flex;
+      gap: 6px;
+    }
+    .chat-box .msg .user { color: #fbbf24; font-weight: 600; white-space: nowrap; }
+    .chat-box .msg .text { color: #e0e6f0; flex: 1; }
+    .chat-box .msg .time { color: #4a5568; font-size: 10px; white-space: nowrap; }
 
     /* ===== TOAST ===== */
     .toast {
@@ -243,11 +301,52 @@
     }
     .toast.show { opacity: 1; }
 
+    /* ===== SETTINGS ===== */
+    .settings-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #1a202a;
+      border: 1px solid #2a2f3a;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      color: #8a9bb0;
+      transition: 0.15s;
+      z-index: 50;
+    }
+    .settings-toggle:hover { background: #2a2f3a; color: #fff; }
+    .settings-panel {
+      display: none;
+      background: #0b0e14;
+      border: 1px solid #2a2f3a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #8a9bb0;
+    }
+    .settings-panel.show { display: block; }
+    .settings-panel label {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #1a202a;
+    }
+    .settings-panel label:last-child { border-bottom: none; }
+    .settings-panel input[type="checkbox"] { accent-color: #fbbf24; }
+
     @media (max-width: 480px) {
       .container { padding: 12px 10px 16px; }
-      .game-area .multiplier { font-size: 42px; }
+      .game-area .multiplier { font-size: 38px; }
       .bet-controls input { font-size: 13px; padding: 8px 10px; }
-      .bet-controls button { font-size: 13px; padding: 8px 12px; }
+      .bet-controls .btn-bet { font-size: 13px; padding: 8px 12px; }
+      .bet-controls .quick-bets button { font-size: 11px; padding: 6px 8px; }
     }
   </style>
 </head>
@@ -255,48 +354,88 @@
 
 <div class="container" id="app">
 
-  <!-- ===== LOADER SCREEN ===== -->
+  <!-- ===== LOADER ===== -->
   <div id="loaderScreen">
     <div class="loader-spinner"></div>
     <div class="loader-text">Loading <span>SkyRiseBet</span>...</div>
   </div>
 
+  <!-- ===== SETTINGS TOGGLE ===== -->
+  <div class="settings-toggle" id="settingsToggle">⚙️</div>
+
+  <!-- ===== SETTINGS PANEL ===== -->
+  <div class="settings-panel" id="settingsPanel">
+    <label><span>🔊 Sound</span> <input type="checkbox" checked /></label>
+    <label><span>🎵 Music</span> <input type="checkbox" checked /></label>
+    <label><span>🎬 Animation</span> <input type="checkbox" checked /></label>
+    <label><span>🎁 Free Bets</span> <input type="checkbox" /></label>
+    <label><span>📜 My Bet History</span> <input type="checkbox" /></label>
+    <label><span>⚖️ Game Limits</span> <input type="checkbox" /></label>
+    <label><span>📖 How To Play</span> <input type="checkbox" /></label>
+    <label><span>🔒 Provably Fair</span> <input type="checkbox" checked disabled /></label>
+  </div>
+
   <!-- ===== HEADER ===== -->
   <div class="header">
-    <h1>✈️ SkyRiseBet</h1>
-    <div class="balance">💰 <span id="balanceDisplay">100.00</span></div>
+    <h1>✈️ Aviator</h1>
+    <div class="balance">💰 <span id="balanceDisplay">100.00</span> <span style="font-size:10px;color:#6b7280;">NGN</span></div>
   </div>
 
   <!-- ===== LIVE STATS ===== -->
   <div class="live-stats">
     <span class="online" id="onlineCount">4,872 online</span>
-    <span>Total Payout: <span id="totalPayout">₦12.4M</span></span>
+    <span>Total Payout: <span class="payout" id="totalPayout">₦12,450,000</span></span>
+  </div>
+
+  <!-- ===== TRUST BADGES ===== -->
+  <div class="trust-badges">
+    <span class="highlight">🏆 Champions Tournament</span>
+    <span>🔒 Provably Fair</span>
+    <span>⚡ Official Game</span>
   </div>
 
   <!-- ===== GAME AREA ===== -->
   <div class="game-area" id="gameArea">
     <div class="multiplier" id="multiplierDisplay">1.00x</div>
     <div class="status"><span class="live" id="gameStatus">● Waiting for next round...</span></div>
+    <div class="history" id="history"></div>
   </div>
 
-  <!-- ===== TARGET CASH-OUT ===== -->
-  <div class="target-section">
-    <label>🎯 Cash-out at:</label>
-    <input type="number" id="targetMultiplier" placeholder="e.g. 2.50" step="0.01" min="1.01" value="2.50" />
+  <!-- ===== WITHDRAWAL LOCK ===== -->
+  <div class="withdraw-lock">
+    <span><span class="lock-icon">🔒</span> Withdraw requires ₦100,000 total bet</span>
+    <div class="progress"><div class="fill" id="withdrawProgress" style="width:0%;"></div></div>
   </div>
 
   <!-- ===== BET CONTROLS ===== -->
   <div class="bet-controls">
-    <input type="number" id="betAmount" placeholder="Amount" value="10" step="5" min="1" />
-    <button id="betBtn">Place Bet</button>
+    <input type="number" id="betAmount" placeholder="Amount" value="50" step="10" min="10" />
+    <div class="quick-bets">
+      <button data-amount="50">50</button>
+      <button data-amount="100">100</button>
+      <button data-amount="200">200</button>
+      <button data-amount="500">500</button>
+      <button data-amount="1000">1,000</button>
+    </div>
+    <button class="btn-bet" id="betBtn">Place Bet</button>
   </div>
 
-  <!-- ===== DEPOSIT / WITHDRAW ===== -->
-  <button class="btn-deposit" id="depositBtn">💰 Deposit</button>
-  <button class="btn-withdraw" id="withdrawBtn">💸 Withdraw</button>
+  <!-- ===== TOP WINNERS ===== -->
+  <div class="top-winners">
+    <h4>🏆 Top Winners</h4>
+    <div class="entry"><span class="name">p***r</span><span class="amount">+₦104,594</span></div>
+    <div class="entry"><span class="name">8***1</span><span class="amount">+₦181,000</span></div>
+    <div class="entry"><span class="name">m***m</span><span class="amount">+₦53,128</span></div>
+    <div class="entry"><span class="name">s***n</span><span class="amount">+₦104,500</span></div>
+    <div class="entry"><span class="name">7***9</span><span class="amount">+₦74,959</span></div>
+  </div>
 
-  <!-- ===== HISTORY ===== -->
-  <div class="history" id="history"></div>
+  <!-- ===== CHAT BOX ===== -->
+  <div class="chat-box" id="chatBox">
+    <div class="msg"><span class="user">SkyKing</span><span class="text">Just won 5x! 🚀</span><span class="time">now</span></div>
+    <div class="msg"><span class="user">LuckyBets</span><span class="text">Run oo them wan clear board ooo</span><span class="time">now</span></div>
+    <div class="msg"><span class="user">Wolfpack</span><span class="text">Pink is about to drop</span><span class="time">now</span></div>
+  </div>
 
 </div>
 
@@ -305,15 +444,17 @@
 
 <script>
   // ============================================================
-  // SKYRISEBET — AVIATOR CLONE WITH 5‑POINT RIG LOGIC
+  // SKYRISEBET — SPORTYBET-STYLE AVIATOR
   // ============================================================
 
   // ---- STATE ----
   let balance = parseFloat(localStorage.getItem('skyBalance')) || 100;
+  let totalBet = parseFloat(localStorage.getItem('skyTotalBet')) || 0;
   let isPlaying = false;
   let currentMultiplier = 1.00;
   let gameInterval = null;
   let history = JSON.parse(localStorage.getItem('skyHistory')) || [];
+  let totalPayout = parseFloat(localStorage.getItem('skyTotalPayout')) || 12450000;
 
   // ---- DOM REFS ----
   const balanceDisplay = document.getElementById('balanceDisplay');
@@ -321,17 +462,20 @@
   const gameStatus = document.getElementById('gameStatus');
   const betAmount = document.getElementById('betAmount');
   const betBtn = document.getElementById('betBtn');
-  const targetMultiplier = document.getElementById('targetMultiplier');
   const historyEl = document.getElementById('history');
+  const chatBox = document.getElementById('chatBox');
   const toast = document.getElementById('toast');
   const loader = document.getElementById('loaderScreen');
+  const withdrawProgress = document.getElementById('withdrawProgress');
+  const totalPayoutEl = document.getElementById('totalPayout');
+  const onlineCount = document.getElementById('onlineCount');
 
   // ---- INIT ----
   balanceDisplay.textContent = balance.toFixed(2);
+  totalPayoutEl.textContent = `₦${totalPayout.toLocaleString()}`;
+  updateWithdrawProgress();
   renderHistory();
-
-  // ---- HIDE LOADER AFTER 2s ----
-  setTimeout(() => loader.classList.add('hidden'), 2000);
+  setTimeout(() => loader.classList.add('hidden'), 1200);
 
   // ---- TOAST ----
   function showToast(msg) {
@@ -348,20 +492,69 @@
     localStorage.setItem('skyBalance', balance);
   }
 
+  // ---- UPDATE WITHDRAW PROGRESS ----
+  function updateWithdrawProgress() {
+    const progress = Math.min((totalBet / 100000) * 100, 100);
+    withdrawProgress.style.width = progress + '%';
+    localStorage.setItem('skyTotalBet', totalBet);
+  }
+
   // ---- RENDER HISTORY ----
   function renderHistory() {
-    historyEl.innerHTML = history.slice(-12).map(h =>
-      `<span class="h-item ${h.crashed ? 'crashed' : 'win'}">${h.value.toFixed(2)}x</span>`
+    historyEl.innerHTML = history.slice(-8).map(h =>
+      `<span class="h-item ${h.crashed ? 'crashed' : ''}">${h.value.toFixed(2)}x</span>`
     ).join('');
   }
 
-  // ---- FAKE ONLINE COUNT ----
+  // ---- FAKE STATS ----
   setInterval(() => {
-    const el = document.getElementById('onlineCount');
-    const current = parseInt(el.textContent.replace(/,/g, ''));
+    const current = parseInt(onlineCount.textContent.replace(/,/g, ''));
     const change = Math.floor(Math.random() * 20) - 5;
-    el.textContent = (current + change).toLocaleString();
+    onlineCount.textContent = (current + change).toLocaleString();
   }, 8000);
+
+  setInterval(() => {
+    const increment = Math.floor(Math.random() * 50000) + 10000;
+    totalPayout += increment;
+    totalPayoutEl.textContent = `₦${totalPayout.toLocaleString()}`;
+    localStorage.setItem('skyTotalPayout', totalPayout);
+  }, 12000);
+
+  // ---- QUICK BET BUTTONS ----
+  document.querySelectorAll('.quick-bets button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.quick-bets button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      betAmount.value = this.getAttribute('data-amount');
+    });
+  });
+
+  // ---- SETTINGS TOGGLE ----
+  document.getElementById('settingsToggle').addEventListener('click', function() {
+    document.getElementById('settingsPanel').classList.toggle('show');
+  });
+
+  // ---- FAKE CHAT ----
+  const chatMessages = [
+    { user: 'SkyKing', text: 'Just won 5x! 🚀' },
+    { user: 'LuckyBets', text: 'Run oo them wan clear board ooo' },
+    { user: 'Wolfpack', text: 'Pink is about to drop' },
+    { user: 'Player_41', text: 'This miss don destabilize me' },
+    { user: 'DiamondHands', text: 'Hundred x still dey front' },
+    { user: 'Gambler_88', text: 'I dey wait for 10x oo' },
+    { user: 'CryptoKing', text: 'Just put 50 dollars, I go cash out at 2x' },
+    { user: 'QueenOfBets', text: 'E don red for some people oo' },
+  ];
+  setInterval(() => {
+    const msg = chatMessages[Math.floor(Math.random() * chatMessages.length)];
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `<span class="user">${msg.user}</span><span class="text">${msg.text}</span><span class="time">${time}</span>`;
+    chatBox.appendChild(div);
+    if (chatBox.children.length > 8) chatBox.removeChild(chatBox.firstChild);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, 4000);
 
   // ---- GAME ENGINE (RIGGED) ----
   function startRound() {
@@ -373,14 +566,10 @@
       return;
     }
 
-    const target = parseFloat(targetMultiplier.value) || 2.50;
-    if (target < 1.01) {
-      showToast('❌ Target must be at least 1.01x.');
-      return;
-    }
-
-    // Deduct bet
     updateBalance(balance - bet);
+    totalBet += bet;
+    updateWithdrawProgress();
+
     isPlaying = true;
     betBtn.disabled = true;
     betBtn.textContent = 'CASH OUT';
@@ -390,11 +579,9 @@
     multiplierDisplay.style.color = '#fbbf24';
     gameStatus.innerHTML = '<span class="live">● Round in progress...</span>';
 
-    // RIG: System crashes at target - 0.05 (5 points below)
-    const crashPoint = Math.max(1.01, target - 0.05);
-
+    const crashPoint = 1.50 + Math.random() * 3.0;
     let step = 0;
-    const steps = 30 + Math.floor(Math.random() * 20); // Randomize speed slightly
+    const steps = 25 + Math.floor(Math.random() * 15);
 
     if (gameInterval) clearInterval(gameInterval);
     gameInterval = setInterval(() => {
@@ -402,136 +589,66 @@
       const progress = step / steps;
       const multiplier = 1 + progress * (crashPoint - 1);
       currentMultiplier = parseFloat(multiplier.toFixed(2));
-
       multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
 
-      // If player manually cashes out before crash
-      // Handled by betBtn click
-    }, 100);
+      if (currentMultiplier >= crashPoint) {
+        clearInterval(gameInterval);
+        isPlaying = false;
+        betBtn.disabled = false;
+        betBtn.textContent = 'Place Bet';
+        multiplierDisplay.style.color = '#ef4444';
+        gameStatus.innerHTML = `<span class="crashed">💥 Crashed at ${crashPoint.toFixed(2)}x</span>`;
+        history.push({ value: crashPoint, crashed: true });
+        renderHistory();
+        localStorage.setItem('skyHistory', JSON.stringify(history));
+        showToast(`💥 Crashed at ${crashPoint.toFixed(2)}x — you lost!`);
+        setTimeout(() => {
+          if (!isPlaying) {
+            multiplierDisplay.style.color = '#fbbf24';
+            gameStatus.innerHTML = '<span class="live">● Waiting for next round...</span>';
+          }
+        }, 2500);
+      }
+    }, 80);
   }
 
-  // ---- CASH OUT (Player or System) ----
-  function cashOut(systemCrashed = false) {
+  // ---- CASH OUT ----
+  function cashOut() {
     if (!isPlaying) return;
-
     clearInterval(gameInterval);
     isPlaying = false;
     betBtn.disabled = false;
     betBtn.textContent = 'Place Bet';
 
-    const target = parseFloat(targetMultiplier.value) || 2.50;
-    const crashPoint = Math.max(1.01, target - 0.05);
-
-    if (systemCrashed || currentMultiplier >= crashPoint) {
-      // Player loses
-      multiplierDisplay.style.color = '#ef4444';
-      gameStatus.innerHTML = `<span class="crashed">💥 Crashed at ${crashPoint.toFixed(2)}x</span>`;
-      history.push({ value: crashPoint, crashed: true });
-      showToast(`💥 Crashed at ${crashPoint.toFixed(2)}x — you lost!`);
-    } else {
-      // Player cashed out successfully
-      const win = parseFloat(betAmount.value) * currentMultiplier;
-      updateBalance(balance + win);
-      multiplierDisplay.style.color = '#22c55e';
-      gameStatus.innerHTML = `<span class="live">✅ Cashed out at ${currentMultiplier.toFixed(2)}x</span>`;
-      history.push({ value: currentMultiplier, crashed: false });
-      showToast(`✅ Won ${win.toFixed(2)} at ${currentMultiplier.toFixed(2)}x`);
-    }
-
+    const win = parseFloat(betAmount.value) * currentMultiplier;
+    updateBalance(balance + win);
+    multiplierDisplay.style.color = '#22c55e';
+    gameStatus.innerHTML = `<span class="live">✅ Cashed out at ${currentMultiplier.toFixed(2)}x</span>`;
+    history.push({ value: currentMultiplier, crashed: false });
     renderHistory();
     localStorage.setItem('skyHistory', JSON.stringify(history));
-
-    // Start next round after delay
+    showToast(`✅ Won ₦${win.toFixed(2)} at ${currentMultiplier.toFixed(2)}x`);
     setTimeout(() => {
       if (!isPlaying) {
         multiplierDisplay.style.color = '#fbbf24';
         gameStatus.innerHTML = '<span class="live">● Waiting for next round...</span>';
       }
-    }, 3000);
+    }, 2000);
   }
 
   // ---- BET BUTTON ----
   betBtn.addEventListener('click', function() {
     if (isPlaying) {
-      // Player manually cashing out
-      cashOut(false);
+      cashOut();
     } else {
       startRound();
     }
-  });
-
-  // ---- DEPOSIT / WITHDRAW (Placeholders) ----
-  document.getElementById('depositBtn').addEventListener('click', () => {
-    showToast('💰 Deposit feature coming soon.');
-  });
-  document.getElementById('withdrawBtn').addEventListener('click', () => {
-    showToast('💸 Withdraw feature coming soon.');
   });
 
   // ---- KEYBOARD SHORTCUT ----
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') betBtn.click();
   });
-
-  // ---- AUTO-CRASH (System triggers if target reached) ----
-  // This is monitored inside the interval — we override the crash logic
-  // The existing startRound interval will continue increasing until crash point.
-  // We need to check if currentMultiplier >= crashPoint inside the interval.
-
-  // We'll override the interval logic by storing a reference and checking.
-  // Let's rewrite startRound with a cleaner approach.
-
-  // ---- OVERRIDE startRound with full rig ----
-  const originalStart = startRound;
-  startRound = function() {
-    if (isPlaying) return;
-
-    const bet = parseFloat(betAmount.value) || 0;
-    if (bet <= 0 || bet > balance) {
-      showToast('❌ Invalid bet or insufficient balance.');
-      return;
-    }
-
-    const target = parseFloat(targetMultiplier.value) || 2.50;
-    if (target < 1.01) {
-      showToast('❌ Target must be at least 1.01x.');
-      return;
-    }
-
-    updateBalance(balance - bet);
-    isPlaying = true;
-    betBtn.disabled = true;
-    betBtn.textContent = 'CASH OUT';
-
-    currentMultiplier = 1.00;
-    multiplierDisplay.textContent = '1.00x';
-    multiplierDisplay.style.color = '#fbbf24';
-    gameStatus.innerHTML = '<span class="live">● Round in progress...</span>';
-
-    const crashPoint = Math.max(1.01, target - 0.05);
-    let step = 0;
-    const steps = 30 + Math.floor(Math.random() * 20);
-
-    if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      const multiplier = 1 + progress * (crashPoint - 1);
-      currentMultiplier = parseFloat(multiplier.toFixed(2));
-      multiplierDisplay.textContent = currentMultiplier.toFixed(2) + 'x';
-
-      // System crash check
-      if (currentMultiplier >= crashPoint) {
-        cashOut(true);
-      }
-    }, 100);
-  };
-
-  // ---- Re-bind ----
-  // The betBtn click now uses the new startRound
-  // We already have the listener above, which calls startRound()
-
-  console.log('✈️ SkyRiseBet loaded — Rigged Aviator active.');
 </script>
 </body>
 </html>
